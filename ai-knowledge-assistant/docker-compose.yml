@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: ai-postgres
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ai_knowledge_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 8861102894Aa#
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
