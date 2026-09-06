@@ -11,7 +11,10 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
 
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000")
+                .allowedOrigins(
+                        "http://localhost:5173",
+                        "https://ai-knowledge-assistant-frontend-92ee1b0bv.vercel.app"
+                )
                 .allowedMethods(
                         "GET",
                         "POST",
