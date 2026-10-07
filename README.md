@@ -18,6 +18,9 @@ The application allows users to upload a PDF document and ask questions in natur
 - 🧹 Automatic cleanup of vectors and chat history
 - 🌐 React Frontend
 - 📚 Swagger API Documentation
+- 🔐 Sign up / Login with JWT authentication
+- 👤 Private, per-user chat history
+- 🌗 Warm, conversational UI with light & dark mode
 
 ---
 
@@ -86,12 +89,19 @@ The application allows users to upload a PDF document and ask questions in natur
 ## Frontend
 
 - React
+- React Router
 - Axios
 - Tailwind CSS
 
 ## Documentation
 
 - Swagger OpenAPI
+
+## Security
+
+- Spring Security
+- JWT (HS256)
+- BCrypt password hashing
 
 ---
 
@@ -262,6 +272,13 @@ Install dependencies:
 npm install
 ```
 
+Optionally point the frontend at a different backend (defaults to `http://localhost:8080`):
+
+```bash
+cp .env.example .env
+# VITE_API_BASE_URL=http://localhost:8080
+```
+
 Run:
 
 ```bash
@@ -287,6 +304,36 @@ http://localhost:8080/swagger-ui.html
 ---
 
 # 📡 REST APIs
+
+All endpoints except sign up / login require an `Authorization: Bearer <token>` header.
+
+## Sign Up
+
+```
+POST /api/auth/signup
+{ "fullName": "Ada Lovelace", "email": "ada@example.com", "password": "********" }
+```
+
+---
+
+## Login
+
+```
+POST /api/auth/login
+{ "email": "ada@example.com", "password": "********" }
+```
+
+Both return `{ "token": "...", "expiresAt": "...", "user": { ... } }`.
+
+---
+
+## Current User
+
+```
+GET /api/auth/me
+```
+
+---
 
 ## Upload PDF
 
@@ -340,7 +387,11 @@ Stores document chunks and vector embeddings.
 
 ### chat_entity
 
-Stores user questions and AI responses.
+Stores user questions and AI responses (linked to the user who asked).
+
+### app_users
+
+Stores registered users (passwords are hashed with BCrypt).
 
 ---
 
@@ -357,12 +408,12 @@ Stores user questions and AI responses.
 - Vector Cleanup
 - Exception Handling
 - React Frontend
+- JWT Authentication (Sign up / Login)
 
 ---
 
 # 🚀 Future Improvements
 
-- User Authentication (JWT)
 - Multiple Document Support
 - Role-Based Access
 - Document Versioning

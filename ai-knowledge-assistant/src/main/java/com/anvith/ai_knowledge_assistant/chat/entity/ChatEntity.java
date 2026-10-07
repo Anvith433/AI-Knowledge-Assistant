@@ -31,4 +31,8 @@ public class ChatEntity {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    // Owner of this conversation entry (nullable for rows created before auth existed)
+    @Column(name = "user_id")
+    private Long userId;
+
 }

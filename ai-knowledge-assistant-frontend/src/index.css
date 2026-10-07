@@ -2,27 +2,213 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   Design tokens (RGB channels so Tailwind can apply alpha)
+   ============================================ */
 @layer base {
+  :root,
+  [data-theme='light'] {
+    --canvas: 250 247 242;
+    --surface: 255 255 255;
+    --sunken: 244 240 233;
+    --ink: 31 27 22;
+    --ink-soft: 92 85 76;
+    --ink-faint: 145 137 126;
+    --line: 232 225 214;
+    --accent: 99 82 230;
+    --accent-strong: 80 63 210;
+    --accent-soft: 238 235 253;
+    --accent-contrast: 255 255 255;
+    --peach: 242 145 104;
+    --success: 22 150 98;
+    --danger: 214 64 69;
+    --warning: 196 128 22;
+    --shadow: 60 40 20;
+    color-scheme: light;
+  }
+
+  [data-theme='dark'] {
+    --canvas: 19 17 15;
+    --surface: 29 26 23;
+    --sunken: 37 33 29;
+    --ink: 242 237 230;
+    --ink-soft: 186 178 167;
+    --ink-faint: 130 122 112;
+    --line: 53 48 42;
+    --accent: 146 132 255;
+    --accent-strong: 170 158 255;
+    --accent-soft: 43 37 74;
+    --accent-contrast: 19 17 15;
+    --peach: 246 164 126;
+    --success: 74 201 145;
+    --danger: 245 110 110;
+    --warning: 236 177 82;
+    --shadow: 0 0 0;
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
-    font-family: 'Inter', sans-serif;
+    @apply bg-canvas text-ink font-sans antialiased;
+    font-feature-settings: 'ss01', 'cv11';
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  ::selection {
+    background: rgb(var(--accent) / 0.22);
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent) / 0.7);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ============================================
+   Reusable component classes
+   ============================================ */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+      transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 select-none;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent text-accent-contrast shadow-glow hover:bg-accent-strong active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply btn text-ink-soft hover:bg-sunken hover:text-ink;
+  }
+
+  .btn-outline {
+    @apply btn border border-line bg-surface text-ink hover:border-ink-faint/50 hover:bg-sunken;
+  }
+
+  .btn-danger {
+    @apply btn bg-danger text-white hover:brightness-110 active:scale-[0.98];
+  }
+
+  .icon-btn {
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-xl text-ink-soft transition
+      hover:bg-sunken hover:text-ink disabled:opacity-40;
+  }
+
+  .card {
+    @apply rounded-2xl border border-line bg-surface shadow-soft;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-[13px] font-semibold text-ink;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-line bg-surface px-3.5 py-3 text-[15px] text-ink placeholder:text-ink-faint
+      transition focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/15;
+  }
+
+  .field-error {
+    @apply border-danger/70 focus:border-danger focus:ring-danger/15;
+  }
+
+  .text-gradient {
+    background-image: linear-gradient(100deg, rgb(var(--accent)) 10%, rgb(var(--peach)) 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .bg-brand-gradient {
+    background-image: linear-gradient(135deg, rgb(var(--accent)) 0%, rgb(var(--peach)) 100%);
+  }
+
+  .paper-grain {
+    background-image: radial-gradient(rgb(var(--ink) / 0.045) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+/* ============================================
+   Markdown answers
+   ============================================ */
+.answer-prose {
+  --tw-prose-body: rgb(var(--ink-soft));
+  --tw-prose-headings: rgb(var(--ink));
+  --tw-prose-bold: rgb(var(--ink));
+  --tw-prose-links: rgb(var(--accent));
+  --tw-prose-bullets: rgb(var(--accent) / 0.6);
+  --tw-prose-counters: rgb(var(--ink-faint));
+  --tw-prose-quotes: rgb(var(--ink));
+  --tw-prose-quote-borders: rgb(var(--accent) / 0.4);
+  --tw-prose-code: rgb(var(--ink));
+  --tw-prose-hr: rgb(var(--line));
+  --tw-prose-th-borders: rgb(var(--line));
+  --tw-prose-td-borders: rgb(var(--line));
+  --tw-prose-pre-bg: rgb(var(--sunken));
+  --tw-prose-pre-code: rgb(var(--ink));
+  line-height: 1.7;
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
-  border-radius: 3px;
+.answer-prose :where(p, ul, ol):first-child {
+  margin-top: 0;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.4);
+.answer-prose :where(p, ul, ol):last-child {
+  margin-bottom: 0;
+}
+
+.answer-prose :where(code):not(:where(pre code)) {
+  @apply rounded-md bg-sunken px-1.5 py-0.5 font-medium;
+}
+
+.answer-prose :where(code):not(:where(pre code))::before,
+.answer-prose :where(code):not(:where(pre code))::after {
+  content: none;
+}
+
+.answer-prose blockquote p:first-of-type::before,
+.answer-prose blockquote p:last-of-type::after {
+  content: none;
+}
+
+.answer-prose pre {
+  @apply rounded-xl border border-line;
+}
+
+/* ============================================
+   Scrollbars
+   ============================================ */
+.scroll-soft {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--ink) / 0.15) transparent;
+}
+
+.scroll-soft::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scroll-soft::-webkit-scrollbar-thumb {
+  background: rgb(var(--ink) / 0.12);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.scroll-soft::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--ink) / 0.25);
 }
