@@ -26,7 +26,7 @@ public class ChatService {
     // Ask AI
     // ===========================
 
-    public ChatResponse chat(ChatRequest request) {
+    public ChatResponse chat(ChatRequest request, Long userId) {
 
         String answer = aiService.ask(request.getQuestion());
 
@@ -34,6 +34,7 @@ public class ChatService {
                 .question(request.getQuestion())
                 .answer(answer)
                 .createdAt(LocalDateTime.now())
+                .userId(userId)
                 .build();
 
         chatRepository.save(chatEntity);
@@ -45,9 +46,9 @@ public class ChatService {
     // Chat History
     // ===========================
 
-    public List<ChatHistoryResponse> getChatHistory() {
+    public List<ChatHistoryResponse> getChatHistory(Long userId) {
 
-        List<ChatEntity> chats = chatRepository.findAll();
+        List<ChatEntity> chats = chatRepository.findByUserIdOrderByCreatedAtAsc(userId);
 
         List<ChatHistoryResponse> response = new ArrayList<>();
 
