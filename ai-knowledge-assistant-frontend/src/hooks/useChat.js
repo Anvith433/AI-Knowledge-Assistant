@@ -1,22 +1,19 @@
 import { useState, useCallback } from 'react';
 import { chatApi } from '../services/api';
 
-export const useChat = (onNotify) => {
-  const [currentAnswer, setCurrentAnswer] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [isAsking, setIsAsking] = useState(false);
+const byOldestFirst = (a, b) => new Date(a.createdAt) - new Date(b.createdAt);
 
-  // Fetch history list
+export const useChat = (onNotify) => {
+  const [messages, setMessages] = useState([]);
+  const [pendingQuestion, setPendingQuestion] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch the signed-in user's conversation
   const fetchHistory = useCallback(async () => {
     setLoading(true);
     try {
       const data = await chatApi.getHistory();
-      // Ensure sorted newest first
-      const sorted = (data || []).sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-      setHistory(sorted);
+      setMessages([...(data || [])].sort(byOldestFirst));
     } catch (err) {
       onNotify?.(err.message, 'error');
     } finally {
@@ -24,41 +21,39 @@ export const useChat = (onNotify) => {
     }
   }, [onNotify]);
 
-  // Submit question to backend
-  const askQuestion = async (question) => {
-    if (!question.trim()) return;
+  // Returns true when the question was answered, so callers can restore the draft on failure
+  const askQuestion = useCallback(
+    async (question) => {
+      const text = question.trim();
+      if (!text) return false;
 
-    setIsAsking(true);
-    setCurrentAnswer(null);
-    try {
-      const res = await chatApi.askQuestion(question.trim());
-      setCurrentAnswer({
-        question: question.trim(),
-        answer: res.answer,
-      });
-      // Refresh chat history after getting answer
-      await fetchHistory();
-    } catch (err) {
-      onNotify?.(err.message, 'error');
-    } finally {
-      setIsAsking(false);
-    }
-  };
+      setPendingQuestion(text);
+      try {
+        const res = await chatApi.askQuestion(text);
+        setMessages((list) => [
+          ...list,
+          { id: `local-${Date.now()}`, question: text, answer: res.answer, createdAt: new Date().toISOString() },
+        ]);
+        return true;
+      } catch (err) {
+        onNotify?.(err.message, 'error');
+        return false;
+      } finally {
+        setPendingQuestion(null);
+      }
+    },
+    [onNotify]
+  );
 
-  const clearCurrentAnswer = () => setCurrentAnswer(null);
-  const clearHistoryState = () => {
-    setHistory([]);
-    setCurrentAnswer(null);
-  };
+  const clearMessages = useCallback(() => setMessages([]), []);
 
   return {
-    currentAnswer,
-    history,
+    messages,
+    pendingQuestion,
+    isAsking: pendingQuestion !== null,
     loading,
-    isAsking,
     askQuestion,
     fetchHistory,
-    clearCurrentAnswer,
-    clearHistoryState,
+    clearMessages,
   };
 };
